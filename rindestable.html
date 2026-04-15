@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RindeStable — ¿Dónde rinden más tus stablecoins?</title>
+<meta name="description" content="Compará rendimientos de stablecoins en +50 protocolos CeFi y DeFi. Condiciones reales, riesgo y APY efectivo. Próximamente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0f0d;
+    --bg-card: #111916;
+    --bg-card-hover: #172019;
+    --bg-table-row: #0f1512;
+    --bg-table-row-alt: #121a16;
+    --accent: #00e88f;
+    --accent-dim: #00e88f22;
+    --accent-mid: #00e88f55;
+    --text-primary: #e8efe9;
+    --text-secondary: #8a9b8f;
+    --text-muted: #5a6b5f;
+    --border: #1e2b23;
+    --risk-low: #00e88f;
+    --risk-med: #f5c542;
+    --risk-high: #f07a4d;
+    --risk-very-high: #e84057;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── AMBIENT GLOW ── */
+  .glow-top {
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 500px;
+    background: radial-gradient(ellipse, var(--accent-dim) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── NAV ── */
+  nav {
+    padding: 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--bg-primary);
+  }
+
+  .logo-text {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .nav-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-mid);
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 60px 0 20px;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 .highlight {
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero p.subtitle {
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 520px;
+    margin: 0 auto 12px;
+    line-height: 1.5;
+  }
+
+  .updated-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 40px;
+  }
+
+  .updated-tag .pulse {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-mid); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px transparent; }
+  }
+
+  /* ── YIELD TABLE ── */
+  .table-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 1fr 100px 90px 80px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 90px 80px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .table-row:last-child { border-bottom: none; }
+  .table-row:hover { background: var(--bg-card-hover); }
+
+  .table-row:nth-child(even) { background: var(--bg-table-row-alt); }
+  .table-row:nth-child(even):hover { background: var(--bg-card-hover); }
+
+  .platform-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .platform-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--bg-primary);
+    flex-shrink: 0;
+  }
+
+  .platform-name {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .platform-type {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .apy-cell {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .type-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+    width: fit-content;
+  }
+
+  .type-cefi {
+    color: #7eb8ff;
+    background: #7eb8ff15;
+    border: 1px solid #7eb8ff30;
+  }
+
+  .type-defi {
+    color: #c49bff;
+    background: #c49bff15;
+    border: 1px solid #c49bff30;
+  }
+
+  .type-boosted {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-mid);
+  }
+
+  .risk-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .risk-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .risk-low .risk-dot { background: var(--risk-low); }
+  .risk-low { color: var(--risk-low); }
+  .risk-med .risk-dot { background: var(--risk-med); }
+  .risk-med { color: var(--risk-med); }
+  .risk-high .risk-dot { background: var(--risk-high); }
+  .risk-high { color: var(--risk-high); }
+
+  .table-footer {
+    padding: 12px 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* ── BLUR OVERLAY ON TABLE ── */
+  .table-blur-section {
+    position: relative;
+  }
+
+  .table-blur-section .blurred-rows {
+    filter: blur(5px);
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .blur-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 10%, var(--bg-card) 90%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 24px;
+  }
+
+  .blur-overlay span {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    cursor: default;
+  }
+
+  /* ── DIFFERENTIATION CALLOUT ── */
+  .diff-callout {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 0 20px;
+  }
+
+  .diff-callout .diff-line {
+    width: 40px;
+    height: 2px;
+    background: var(--accent);
+    margin: 0 auto 16px;
+    border-radius: 2px;
+  }
+
+  .diff-callout p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.55;
+  }
+
+  .diff-callout p strong {
+    color: var(--text-primary);
+  }
+
+  /* ── EMAIL CAPTURE ── */
+  .capture-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 32px;
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .capture-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .capture-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+
+  .capture-section p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .email-form {
+    display: flex;
+    gap: 10px;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .email-form input {
+    flex: 1;
+    padding: 14px 18px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .email-form input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .email-form input:focus {
+    border-color: var(--accent);
+  }
+
+  .email-form button {
+    padding: 14px 28px;
+    background: var(--accent);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+
+  .email-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px var(--accent-mid);
+  }
+
+  .email-form button:active {
+    transform: translateY(0);
+  }
+
+  .form-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 12px;
+  }
+
+  /* ── SEGMENTATION (hidden by default) ── */
+  .segmentation {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .segmentation.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .seg-question {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+  }
+
+  .seg-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .seg-option {
+    padding: 12px 18px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+
+  .seg-option:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    background: var(--accent-dim);
+  }
+
+  .seg-option.selected {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* ── SUCCESS STATE ── */
+  .success-msg {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .success-msg.active { display: block; }
+
+  .success-msg .check-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-dim);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 22px;
+  }
+
+  .success-msg h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .success-msg p {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  /* ── VALUE PROPS ── */
+  .value-props {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .value-prop {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .value-prop .icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .value-prop h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .value-prop p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  footer p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  footer .disclaimer {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .table-header, .table-row {
+      grid-template-columns: 1fr 80px 70px;
+    }
+
+    .table-header > :nth-child(4),
+    .table-row > :nth-child(4) {
+      display: none;
+    }
+
+    .platform-icon { width: 32px; height: 32px; font-size: 11px; }
+    .platform-name { font-size: 13px; }
+    .apy-cell { font-size: 16px; }
+
+    .email-form {
+      flex-direction: column;
+    }
+
+    .email-form button {
+      padding: 14px;
+    }
+
+    .value-props {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .hero { padding: 40px 0 16px; }
+    .capture-section { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-top"></div>
+
+<div class="container">
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="logo">
+      <div class="logo-mark">R$</div>
+      <div class="logo-text">Rinde<span>Stable</span></div>
+    </a>
+    <div class="nav-badge">PRÓXIMAMENTE</div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>¿Dónde rinden más tus <span class="highlight">stablecoins</span> hoy?</h1>
+    <p class="subtitle">Compará rendimientos reales de tus stablecoins en CeFi y DeFi. Todo en un solo lugar.</p>
+    <div class="updated-tag">
+      <span class="pulse"></span>
+      Actualizado Diariamente · +50 Protocolos · CeFi y DeFi
+    </div>
+  </section>
+
+  <!-- YIELD TABLE -->
+  <div class="table-wrapper">
+    <div class="table-header">
+      <span>Plataforma</span>
+      <span>APY</span>
+      <span>Tipo</span>
+      <span>Riesgo</span>
+    </div>
+
+    <!-- All rows blurred as teaser -->
+    <div class="table-blur-section">
+      <div class="blurred-rows">
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #ffe14d;">C1</div>
+            <div>
+              <div class="platform-name">Protocolo CeFi</div>
+              <div class="platform-type">USDT</div>
+            </div>
+          </div>
+          <div class="apy-cell">3.2%</div>
+          <div><span class="type-badge type-cefi">CeFi</span></div>
+          <div class="risk-cell risk-low"><span class="risk-dot"></span> Bajo</div>
+        </div>
+
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #6c5ce7;">C2</div>
+            <div>
+              <div class="platform-name">Protocolo CeFi</div>
+              <div class="platform-type">USDT</div>
+            </div>
+          </div>
+          <div class="apy-cell">4.1%</div>
+          <div><span class="type-badge type-cefi">CeFi</span></div>
+          <div class="risk-cell risk-low"><span class="risk-dot"></span> Bajo</div>
+        </div>
+
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #f0b90b;">C3</div>
+            <div>
+              <div class="platform-name">Exchange Global</div>
+              <div class="platform-type">USDT Flexible</div>
+            </div>
+          </div>
+          <div class="apy-cell">4.8%</div>
+          <div><span class="type-badge type-cefi">CeFi</span></div>
+          <div class="risk-cell risk-low"><span class="risk-dot"></span> Bajo</div>
+        </div>
+
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #b6509e;">D1</div>
+            <div>
+              <div class="platform-name">Protocolo DeFi</div>
+              <div class="platform-type">USDC · Ethereum</div>
+            </div>
+          </div>
+          <div class="apy-cell">5.8%</div>
+          <div><span class="type-badge type-defi">DeFi</span></div>
+          <div class="risk-cell risk-med"><span class="risk-dot"></span> Medio</div>
+        </div>
+
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #00d395;">D2</div>
+            <div>
+              <div class="platform-name">Protocolo DeFi</div>
+              <div class="platform-type">USDC · Base</div>
+            </div>
+          </div>
+          <div class="apy-cell">6.4%</div>
+          <div><span class="type-badge type-defi">DeFi</span></div>
+          <div class="risk-cell risk-med"><span class="risk-dot"></span> Medio</div>
+        </div>
+
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #00e88f;">B1</div>
+            <div>
+              <div class="platform-name">DeFi Boosted</div>
+              <div class="platform-type">USDC · Boosted</div>
+            </div>
+          </div>
+          <div class="apy-cell">8.2%</div>
+          <div><span class="type-badge type-boosted">Boosted</span></div>
+          <div class="risk-cell risk-med"><span class="risk-dot"></span> Medio</div>
+        </div>
+
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #3070f0;">D3</div>
+            <div>
+              <div class="platform-name">Protocolo DeFi</div>
+              <div class="platform-type">USDT · Ethereum</div>
+            </div>
+          </div>
+          <div class="apy-cell">9.7%</div>
+          <div><span class="type-badge type-defi">DeFi</span></div>
+          <div class="risk-cell risk-high"><span class="risk-dot"></span> Alto</div>
+        </div>
+
+        <div class="table-row">
+          <div class="platform-cell">
+            <div class="platform-icon" style="background: #2c6dd4;">D4</div>
+            <div>
+              <div class="platform-name">Protocolo DeFi</div>
+              <div class="platform-type">USDC · Fixed Yield</div>
+            </div>
+          </div>
+          <div class="apy-cell">11.4%</div>
+          <div><span class="type-badge type-defi">DeFi</span></div>
+          <div class="risk-cell risk-high"><span class="risk-dot"></span> Alto</div>
+        </div>
+      </div>
+
+      <div class="blur-overlay">
+        <span>+50 plataformas · Próximamente</span>
+      </div>
+    </div>
+
+    <div class="table-footer">
+      Tasas ilustrativas · Datos reales próximamente
+    </div>
+  </div>
+
+  <!-- DIFFERENTIATION CALLOUT -->
+  <div class="diff-callout">
+    <div class="diff-line"></div>
+    <p><strong>100% Yield, 0% Marketing.</strong> Te mostramos cuáles son las condiciones reales para desbloquear todo el potencial de tus crypto.</p>
+  </div>
+
+  <!-- EMAIL CAPTURE -->
+  <section class="capture-section" id="capture">
+    <!-- Default state -->
+    <div id="form-state">
+      <h2>Sé el primero en acceder</h2>
+      <div class="email-form">
+        <input type="email" id="email-input" placeholder="tu@email.com" required>
+        <button type="button" id="submit-btn" onclick="handleSubmit()">Quiero acceso</button>
+      </div>
+      <p class="form-note">Sin spam · Te avisamos solo cuando lancemos</p>
+    </div>
+
+    <!-- Segmentation state -->
+    <div class="segmentation" id="seg-state">
+      <p class="seg-question">Última pregunta — ¿dónde tenés tus stablecoins hoy?</p>
+      <div class="seg-options">
+        <button class="seg-option" onclick="handleSegment(this, 'cefi_local')">Exchange local (Lemon, Belo, Buenbit)</button>
+        <button class="seg-option" onclick="handleSegment(this, 'cefi_global')">Binance u otro exchange global</button>
+        <button class="seg-option" onclick="handleSegment(this, 'defi')">DeFi (Aave, Compound, etc.)</button>
+        <button class="seg-option" onclick="handleSegment(this, 'none')">Todavía no tengo stablecoins</button>
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div class="success-msg" id="success-state">
+      <div class="check-icon">✓</div>
+      <h3>¡Listo! Estás en la lista.</h3>
+      <p>Te vamos a avisar apenas lancemos. Compartí con alguien que tenga stablecoins dormidos.</p>
+    </div>
+  </section>
+
+  <!-- VALUE PROPS -->
+  <div class="value-props">
+    <div class="value-prop">
+      <div class="icon">📊</div>
+      <h3>CeFi + DeFi</h3>
+      <p>Exchanges locales, globales y protocolos DeFi en una sola tabla comparativa.</p>
+    </div>
+    <div class="value-prop">
+      <div class="icon">🔓</div>
+      <h3>Condiciones claras</h3>
+      <p>Lockups, tokens requeridos, y qué necesitás para alcanzar cada rendimiento.</p>
+    </div>
+    <div class="value-prop">
+      <div class="icon">🔔</div>
+      <h3>Alertas de yield</h3>
+      <p>Configurá umbrales y recibí notificaciones cuando un rendimiento suba o baje.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p class="disclaimer">
+      RindeStable no es asesoramiento financiero. Las tasas mostradas son ilustrativas y se actualizan periódicamente.
+      No custodiamos fondos ni ejecutamos transacciones en tu nombre. Hacé tu propia investigación antes de invertir.
+      <br><br>
+      © 2026 RindeStable
+    </p>
+  </footer>
+
+</div>
+
+<script>
+  // Simple form state management
+  function handleSubmit() {
+    const email = document.getElementById('email-input').value;
+    if (!email || !email.includes('@')) {
+      document.getElementById('email-input').style.borderColor = '#e84057';
+      return;
+    }
+
+    // Store email (in prod: send to Mailchimp/ConvertKit)
+    console.log('Email captured:', email);
+
+    // Show segmentation
+    document.getElementById('form-state').style.display = 'none';
+    document.getElementById('seg-state').classList.add('active');
+  }
+
+  function handleSegment(el, segment) {
+    // Visual feedback
+    document.querySelectorAll('.seg-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    // Store segment (in prod: tag in email platform)
+    console.log('Segment:', segment);
+
+    // Short delay then show success
+    setTimeout(() => {
+      document.getElementById('seg-state').classList.remove('active');
+      document.getElementById('seg-state').style.display = 'none';
+      document.getElementById('success-state').classList.add('active');
+    }, 600);
+  }
+
+  // Enter key support
+  document.getElementById('email-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') handleSubmit();
+  });
+</script>
+
+</body>
+</html>
