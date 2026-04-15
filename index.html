@@ -850,7 +850,12 @@
 
 <script>
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw_iq0ZgY46JL0cd_QGsS3w8TPGn64FWYNXrKE5DCOENwQ8ZasRBxHl9Hlbz5DwAyPg/exec';
-  let capturedEmail = '';
+   let capturedEmail = '';
+
+  function sendToSheet(email, segment) {
+    const url = SHEET_URL + '?email=' + encodeURIComponent(email) + '&segment=' + encodeURIComponent(segment || '');
+    fetch(url, { mode: 'no-cors' });
+  }
 
   function handleSubmit() {
     const email = document.getElementById('email-input').value;
@@ -859,45 +864,23 @@
       return;
     }
 
-    // Disable button while submitting
     const btn = document.getElementById('submit-btn');
     btn.textContent = 'Enviando...';
     btn.disabled = true;
-
-    // Store email for segmentation step
     capturedEmail = email;
 
-    // Send email to Google Sheet (no segment yet)
-    fetch(SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, segment: '' })
-    }).then(() => {
-      // Show segmentation regardless of response (no-cors won't give us one)
-      document.getElementById('form-state').style.display = 'none';
-      document.getElementById('seg-state').classList.add('active');
-    }).catch(() => {
-      // Still show segmentation — don't block UX on network error
-      document.getElementById('form-state').style.display = 'none';
-      document.getElementById('seg-state').classList.add('active');
-    });
+    sendToSheet(email, '');
+
+    document.getElementById('form-state').style.display = 'none';
+    document.getElementById('seg-state').classList.add('active');
   }
 
   function handleSegment(el, segment) {
-    // Visual feedback
     document.querySelectorAll('.seg-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
 
-    // Update the row with segment data
-    fetch(SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: capturedEmail, segment: segment })
-    });
+    sendToSheet(capturedEmail, segment);
 
-    // Short delay then show success
     setTimeout(() => {
       document.getElementById('seg-state').classList.remove('active');
       document.getElementById('seg-state').style.display = 'none';
@@ -905,7 +888,6 @@
     }, 600);
   }
 
-  // Enter key support
   document.getElementById('email-input').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') handleSubmit();
   });
