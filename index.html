@@ -849,20 +849,39 @@
 </div>
 
 <script>
-  // Simple form state management
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyAqJQ8YUMglVaSfTX5kaXwEPTg6u_1p5AJRecp1edaKxfKkMYWAMgWVZyLSEaWG_c/exec';
+  let capturedEmail = '';
+
   function handleSubmit() {
     const email = document.getElementById('email-input').value;
-    if (!email || !email.includes('@')) {
+    if (!email || !email.includes('@') || !email.includes('.')) {
       document.getElementById('email-input').style.borderColor = '#e84057';
       return;
     }
 
-    // Store email (in prod: send to Mailchimp/ConvertKit)
-    console.log('Email captured:', email);
+    // Disable button while submitting
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
 
-    // Show segmentation
-    document.getElementById('form-state').style.display = 'none';
-    document.getElementById('seg-state').classList.add('active');
+    // Store email for segmentation step
+    capturedEmail = email;
+
+    // Send email to Google Sheet (no segment yet)
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, segment: '' })
+    }).then(() => {
+      // Show segmentation regardless of response (no-cors won't give us one)
+      document.getElementById('form-state').style.display = 'none';
+      document.getElementById('seg-state').classList.add('active');
+    }).catch(() => {
+      // Still show segmentation — don't block UX on network error
+      document.getElementById('form-state').style.display = 'none';
+      document.getElementById('seg-state').classList.add('active');
+    });
   }
 
   function handleSegment(el, segment) {
@@ -870,8 +889,13 @@
     document.querySelectorAll('.seg-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
 
-    // Store segment (in prod: tag in email platform)
-    console.log('Segment:', segment);
+    // Update the row with segment data
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: capturedEmail, segment: segment })
+    });
 
     // Short delay then show success
     setTimeout(() => {
