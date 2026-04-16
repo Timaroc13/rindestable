@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gracias — RindeStable</title>
+<meta name="description" content="Estás en la lista de espera de RindeStable.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0f0d;
+    --bg-card: #111916;
+    --accent: #00e88f;
+    --accent-dim: #00e88f22;
+    --accent-mid: #00e88f55;
+    --text-primary: #e8efe9;
+    --text-secondary: #8a9b8f;
+    --text-muted: #5a6b5f;
+    --border: #1e2b23;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Ambient glow */
+  .glow-top {
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 500px;
+    background: radial-gradient(ellipse, var(--accent-dim) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+  }
+
+  nav {
+    padding: 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--bg-primary);
+  }
+
+  .logo-text {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .nav-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-mid);
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  .success-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 56px 40px;
+    text-align: center;
+    max-width: 520px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .success-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .check-circle {
+    width: 72px;
+    height: 72px;
+    background: var(--accent-dim);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--accent-mid); }
+    50% { box-shadow: 0 0 0 12px transparent; }
+  }
+
+  .check-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--accent);
+  }
+
+  .success-card h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .success-card .highlight { color: var(--accent); }
+
+  .success-card p.lead {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    line-height: 1.55;
+  }
+
+  .next-steps {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: left;
+    margin-bottom: 32px;
+  }
+
+  .next-steps h3 {
+    font-size: 13px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .next-steps ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .next-steps li {
+    font-size: 14px;
+    color: var(--text-primary);
+    padding-left: 24px;
+    position: relative;
+  }
+
+  .next-steps li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .share-section {
+    margin-bottom: 32px;
+  }
+
+  .share-section p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  .share-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .share-btn {
+    padding: 10px 18px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .share-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .back-link {
+    color: var(--text-muted);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--accent);
+  }
+
+  footer {
+    text-align: center;
+    padding: 32px 0;
+  }
+
+  footer p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .success-card {
+      padding: 40px 24px;
+    }
+    .success-card h1 {
+      font-size: 24px;
+    }
+    .share-buttons {
+      flex-direction: column;
+    }
+    .share-btn {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-top"></div>
+
+<div class="container">
+
+  <nav>
+    <a href="/" class="logo">
+      <div class="logo-mark">R$</div>
+      <div class="logo-text">Rinde<span>Stable</span></div>
+    </a>
+    <div class="nav-badge">PRÓXIMAMENTE</div>
+  </nav>
+
+  <main>
+    <div class="success-card">
+      <div class="check-circle">
+        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+
+      <h1>¡Estás <span class="highlight">en la lista</span>!</h1>
+      <p class="lead">Te vamos a avisar apenas lancemos. Mientras tanto, te dejamos algo para que no esperes en silencio.</p>
+
+      <div class="next-steps">
+        <h3>Próximos pasos</h3>
+        <ul>
+          <li>Te avisamos por mail apenas lancemos</li>
+          <li>Vas a tener acceso anticipado antes que nadie</li>
+          <li>Vamos a pedirte feedback en el camino</li>
+        </ul>
+      </div>
+
+      <div class="share-section">
+        <p>¿Conocés a alguien con stablecoins dormidas?</p>
+        <div class="share-buttons">
+          <a href="https://twitter.com/intent/tweet?text=Compar%C3%A1%20rendimientos%20de%20stablecoins%20en%20%2B50%20protocolos%20CeFi%20y%20DeFi.%20Pr%C3%B3ximamente%20%E2%86%92&url=https://rindestable.com" target="_blank" class="share-btn">Compartir en X</a>
+          <a href="https://wa.me/?text=Compar%C3%A1%20rendimientos%20de%20stablecoins%20en%20%2B50%20protocolos%20CeFi%20y%20DeFi.%20Pr%C3%B3ximamente%20%E2%86%92%20https://rindestable.com" target="_blank" class="share-btn">Compartir por WhatsApp</a>
+        </div>
+      </div>
+
+      <a href="/" class="back-link">← Volver al inicio</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 RindeStable</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
