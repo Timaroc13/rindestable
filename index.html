@@ -877,11 +877,10 @@
 
     sendToSheet(capturedEmail, segment);
 
-    setTimeout(() => {
-      document.getElementById('seg-state').classList.remove('active');
-      document.getElementById('seg-state').style.display = 'none';
-      document.getElementById('success-state').classList.add('active');
-    }, 600);
+// Short delay then redirect to thank you page
+setTimeout(() => {
+  window.location.href = '/gracias';
+}, 600);
   }
 
   document.getElementById('email-input').addEventListener('keypress', function(e) {
